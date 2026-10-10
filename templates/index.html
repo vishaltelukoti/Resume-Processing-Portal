@@ -1,0 +1,32 @@
+{% extends "base.html" %}
+{% block content %}
+<section class="intro">
+  <h1>Resume document processing</h1>
+  <p>Upload a candidate's PDF resume. This local POC securely stores it, extracts its text, and tracks the processing result.</p>
+</section>
+
+<section class="card upload-card">
+  <h2>Upload a PDF resume</h2>
+  <p class="muted">PDF files only, up to 10 MB.</p>
+  {% if error %}<div class="alert alert-error" role="alert">{{ error }}</div>{% endif %}
+  <form action="/upload" method="post" enctype="multipart/form-data">
+    <label for="resume">Choose resume</label>
+    <input id="resume" name="resume" type="file" accept="application/pdf,.pdf" required>
+    <button type="submit">Upload &amp; Process</button>
+  </form>
+</section>
+
+<section class="history">
+  <h2>Uploaded documents</h2>
+  {% if documents %}
+  <div class="table-wrap"><table>
+    <thead><tr><th>Original filename</th><th>Upload date (UTC)</th><th>File type</th><th>Status</th><th>Action</th></tr></thead>
+    <tbody>{% for document in documents %}<tr>
+      <td>{{ document.filename }}</td><td>{{ document.upload_date }}</td><td>{{ document.file_type }}</td>
+      <td><span class="badge badge-{{ document.status|lower }}">{{ document.status }}</span></td>
+      <td><a class="button button-secondary" href="/documents/{{ document.document_id }}">View</a></td>
+    </tr>{% endfor %}</tbody>
+  </table></div>
+  {% else %}<p class="empty-state">No resumes have been uploaded yet.</p>{% endif %}
+</section>
+{% endblock %}
