@@ -6,3 +6,4 @@ data/extracted/
 data/metadata.json
 data/metadata.tmp
 .env
+azure_functions/local.settings.json

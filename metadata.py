@@ -6,7 +6,8 @@ from datetime import datetime, timezone
 from pathlib import Path
 
 
-METADATA_FILE = Path("data") / "metadata.json"
+PROJECT_DIR = Path(__file__).resolve().parent
+METADATA_FILE = PROJECT_DIR / "data" / "metadata.json"
 
 
 def _utc_timestamp() -> str:

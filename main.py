@@ -14,12 +14,13 @@ import processor
 import storage
 
 
+PROJECT_DIR = Path(__file__).resolve().parent
 MAX_FILE_SIZE = 10 * 1024 * 1024  # 10 MB
 PDF_CONTENT_TYPES = {"application/pdf", "application/x-pdf"}
 
 app = FastAPI(title="Mini Resume Processing Portal")
-app.mount("/static", StaticFiles(directory="static"), name="static")
-templates = Jinja2Templates(directory="templates")
+app.mount("/static", StaticFiles(directory=PROJECT_DIR / "static"), name="static")
+templates = Jinja2Templates(directory=PROJECT_DIR / "templates")
 
 
 def dashboard_response(request: Request, error: str | None = None):
@@ -57,9 +58,14 @@ async def upload_resume(request: Request, resume: UploadFile = File(...)):
     document_id = str(uuid4())
     try:
         original_blob_name = storage.upload_original_pdf(document_id, content)
-        metadata.create_document(
-            document_id, filename, resume.content_type, original_blob_name=original_blob_name
-        )
+        try:
+            metadata.create_document(
+                document_id, filename, resume.content_type, original_blob_name=original_blob_name
+            )
+        except Exception:
+            # Metadata does not exist yet, so this new Azure blob is safe to remove.
+            storage.delete_original_pdf(original_blob_name)
+            raise
         metadata.update_status(document_id, "Processing")
 
         try:

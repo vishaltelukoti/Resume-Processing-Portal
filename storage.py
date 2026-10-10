@@ -5,12 +5,15 @@ from pathlib import Path
 from azure.core.exceptions import AzureError
 from azure.storage.blob import BlobServiceClient, ContentSettings
 from dotenv import load_dotenv
+import logging
 import os
 
 
-load_dotenv()
+PROJECT_DIR = Path(__file__).resolve().parent
+load_dotenv(PROJECT_DIR / ".env")
+logger = logging.getLogger(__name__)
 
-DATA_DIR = Path("data")
+DATA_DIR = PROJECT_DIR / "data"
 UPLOADS_DIR = DATA_DIR / "uploads"
 EXTRACTED_DIR = DATA_DIR / "extracted"
 
@@ -71,6 +74,17 @@ def download_original_pdf(blob_name: str) -> bytes:
         raise
     except AzureError as exc:
         raise AzureStorageError("The original PDF could not be downloaded from Azure Blob Storage.") from exc
+
+
+def delete_original_pdf(blob_name: str) -> bool:
+    """Delete a newly uploaded blob when its metadata record could not be created."""
+    try:
+        _original_pdfs_container().get_blob_client(blob_name).delete_blob()
+        return True
+    except (AzureStorageError, AzureError):
+        # Blob name contains only the generated document ID; never log credentials.
+        logger.warning("Could not clean up uploaded Azure blob: %s", blob_name)
+        return False
 
 
 def save_extracted_text(document_id: str, text: str) -> str:
