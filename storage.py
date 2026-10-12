@@ -29,8 +29,16 @@ class AzureStorageError(Exception):
 
 def _original_pdfs_container():
     """Return the configured container client without exposing credentials."""
+    return _blob_container("AZURE_BLOB_CONTAINER")
+
+
+def _extracted_text_container():
+    return _blob_container("AZURE_EXTRACTED_CONTAINER")
+
+
+def _blob_container(container_setting: str):
     connection_string = os.getenv("AZURE_STORAGE_CONNECTION_STRING")
-    container_name = os.getenv("AZURE_BLOB_CONTAINER")
+    container_name = os.getenv(container_setting)
     if not connection_string or not container_name:
         raise AzureStorageError("Azure Blob Storage is not configured.")
     try:
@@ -74,6 +82,16 @@ def download_original_pdf(blob_name: str) -> bytes:
         raise
     except AzureError as exc:
         raise AzureStorageError("The original PDF could not be downloaded from Azure Blob Storage.") from exc
+
+
+def download_extracted_text(blob_name: str) -> bytes:
+    """Download extracted text from Azure Blob Storage."""
+    try:
+        return _extracted_text_container().get_blob_client(blob_name).download_blob().readall()
+    except AzureStorageError:
+        raise
+    except AzureError as exc:
+        raise AzureStorageError("The extracted text could not be downloaded from Azure Blob Storage.") from exc
 
 
 def delete_original_pdf(blob_name: str) -> bool:
