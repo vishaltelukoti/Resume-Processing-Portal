@@ -4,10 +4,30 @@
 <a class="back-link" href="/">&larr; Back to Dashboard</a>
 <section class="card document-card">
   <h1>{{ document.filename }}</h1>
-  <dl class="details"><dt>Uploaded</dt><dd>{{ document.upload_date }}</dd><dt>Status</dt><dd><span class="badge badge-{{ document.status|lower }}">{{ document.status }}</span></dd></dl>
-  <div class="actions"><a class="button" href="/download/pdf/{{ document.document_id }}">Download Original PDF</a>
-  {% if extracted_text is not none %}<a class="button button-secondary" href="/download/text/{{ document.document_id }}">Download Extracted TXT</a>{% endif %}</div>
-  {% if document.status == "Failed" %}<div class="alert alert-error">{{ document.error_message or "Processing failed." }}</div>{% endif %}
-  {% if extracted_text is not none %}<h2>Extracted text</h2><pre class="text-output">{{ extracted_text }}</pre>{% elif document.status == "Completed" %}<div class="alert alert-error">The extracted text file is missing.</div>{% endif %}
+  <dl class="details">
+    <dt>Uploaded</dt>
+    <dd>{{ document.upload_date }}</dd>
+    <dt>Status</dt>
+    <dd>
+      <span class="badge badge-{{ document.status|lower }}">{{ document.status }}</span>
+    </dd>
+  </dl>
+  <div class="actions">
+    <a class="button" href="/download/pdf/{{ document.document_id }}">Download Original PDF</a>
+    {% if extracted_text is not none %}
+      <a class="button button-secondary" href="/download/text/{{ document.document_id }}">
+        Download Extracted TXT
+      </a>
+    {% endif %}
+  </div>
+  {% if document.status == "Failed" %}
+    <div class="alert alert-error">{{ document.error_message or "Processing failed." }}</div>
+  {% endif %}
+  {% if extracted_text is not none %}
+    <h2>Extracted text</h2>
+    <pre class="text-output">{{ extracted_text }}</pre>
+  {% elif document.status == "Completed" %}
+    <div class="alert alert-error">The extracted text file is missing.</div>
+  {% endif %}
 </section>
 {% endblock %}

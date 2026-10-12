@@ -17,7 +17,12 @@ class FakeMessage:
     def get_body(self):
         event = {
             "eventType": "Microsoft.Storage.BlobCreated",
-            "data": {"url": f"https://account.blob.core.windows.net/original-pdfs/{self.document_id}/original.pdf"},
+            "data": {
+                "url": (
+                    "https://account.blob.core.windows.net/original-pdfs/"
+                    f"{self.document_id}/original.pdf"
+                ),
+            },
         }
         return json.dumps(event).encode("utf-8")
 
@@ -41,7 +46,10 @@ class FakeTableClient:
 
 class FunctionProcessingTests(unittest.TestCase):
     def setUp(self):
-        self.environment = patch.dict(os.environ, {"AzureWebJobsStorage": "UseDevelopmentStorage=true"})
+        self.environment = patch.dict(
+            os.environ,
+            {"AzureWebJobsStorage": "UseDevelopmentStorage=true"},
+        )
         self.environment.start()
         self.addCleanup(self.environment.stop)
 
